@@ -10,6 +10,7 @@ public class Player extends Thread {
     @Override
     public void run() {
         System.out.println("Start player");
-        //TODO
+
+        
     }
 }
