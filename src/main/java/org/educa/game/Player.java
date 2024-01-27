@@ -1,6 +1,8 @@
 package org.educa.game;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
@@ -19,14 +21,32 @@ public class Player extends Thread {
     public void run() {
         System.out.println("Start player");
 
+        if (!startConnection()) {
+            System.out.println("No se pudo conectar con el servidor.");
+        } else {
+            //Logica del cliente
+        }
+
+
+    }
+
+    public boolean startConnection() {
         try {
             socket = new Socket(HOST, PORT);
             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             writer.println(this.getName());
             System.out.println("Conexion realizada con exito");
+            return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
+            return false;
         }
 
+    }
+
+    public void closeConnection() throws IOException {
+        if (socket != null && !socket.isClosed()) {
+            socket.close();
+        }
     }
 }
