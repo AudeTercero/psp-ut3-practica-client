@@ -11,7 +11,6 @@ import java.util.List;
 public class Player extends Thread {
     private static final String HOST = "localhost";
     private static final int PORT = 5555;
-    private Socket socket;
     private Games gameDices = new GameDices();
     public static  int guestPort = 5558;
     public static  int hostPort = 5554;
@@ -34,23 +33,24 @@ public class Player extends Thread {
             players = receiveResponse(playerSocket);
 
             if (players != null) {
-                int idMatch;
+                int idMatch = -1;
                 int rol = -1;
                 for (String s : players) {
                     if(this.getName().equalsIgnoreCase(s.split(",")[1])){
                         idMatch = Integer.parseInt(s.split(",")[0]);
                         rol = Integer.parseInt(s.split(",")[4]);
                         System.out.println("Partida: "+idMatch + " Eres: "+convertCodeRolToString(rol));
+
                     }else {
                         String auxNick = s.split(",")[1];
                         String auxHost = s.split(",")[2];
                         int auxPort = Integer.parseInt(s.split(",")[3]);
-                        int auxRol = Integer.parseInt(s.split(",")[4]);
                         System.out.println(auxNick+": Host->"+auxHost+", Puerto->"+auxPort);
                     }
 
                 }
-                gameDices.play(rol);
+                gameDices.play(rol,idMatch);
+                sendFinalMatch(playerSocket,rol,idMatch);
 
 
             }
@@ -85,6 +85,18 @@ public class Player extends Thread {
             return "Invitado";
         }
     }
+    private void sendFinalMatch(Socket playerSocket,int role,int idMatch)throws IOException{
+        if(role==0){
+            PrintWriter writer = new PrintWriter(playerSocket.getOutputStream(), true);
+            String dataPlayer = idMatch +"," ;
+            writer.println(dataPlayer);
+            writer.flush();
+            System.out.println("Anfitrion ha finalizado partida");
+        }else{
+            System.out.println("Invitado ha finalizado partida");
+        }
+
+    }
 
 
     private void sendDataServer(Socket playerSocket) throws IOException {
@@ -111,9 +123,5 @@ public class Player extends Thread {
     }
 
 
-    public void closeConnection() throws IOException {
-        if (socket != null && !socket.isClosed()) {
-            socket.close();
-        }
-    }
+
 }

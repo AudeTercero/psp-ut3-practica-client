@@ -17,12 +17,11 @@ public class GameDices implements Games{
 
 
     @Override
-    public void play(int role) throws InterruptedException {
+    public void play(int role,int idMatch) throws InterruptedException {
         if (role == 1) {
             Thread.sleep(2000);
-            this.guestPort = Player.getGuestPort();
-            Player.incrementPort();
-            this.hostPort = Player.getHostPort();
+            this.guestPort = Player.getGuestPort()+idMatch+100;
+            this.hostPort = Player.getHostPort()+idMatch;
             System.out.println("Estoy tirando para mandarselo al hostport "+hostPort);
             InetSocketAddress addrGuest = new InetSocketAddress("localhost", guestPort);
 
@@ -45,9 +44,8 @@ public class GameDices implements Games{
             }
 
         } else {
-            this.hostPort = Player.getHostPort();
-            Player.decrementPort();
-            this.guestPort = Player.getGuestPort();
+            this.hostPort = Player.getHostPort()+idMatch;
+            this.guestPort = Player.getGuestPort()+idMatch+100;
             System.out.println("esperando a invitado "+hostPort);
             InetSocketAddress addrHost = new InetSocketAddress("localhost", hostPort);
             try (DatagramSocket datagramSocket = new DatagramSocket(addrHost)) {
