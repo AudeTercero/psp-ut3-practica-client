@@ -12,6 +12,9 @@ public class Player extends Thread {
     private static final String HOST = "localhost";
     private static final int PORT = 5555;
     private Socket socket;
+    private Games gameDices = new GameDices();
+    public static  int guestPort = 5558;
+    public static  int hostPort = 5554;
 
     public Player(String name, String gameType) {
         super.setName(name);
@@ -32,7 +35,7 @@ public class Player extends Thread {
 
             if (players != null) {
                 int idMatch;
-                int rol;
+                int rol = -1;
                 for (String s : players) {
                     if(this.getName().equalsIgnoreCase(s.split(",")[1])){
                         idMatch = Integer.parseInt(s.split(",")[0]);
@@ -46,8 +49,9 @@ public class Player extends Thread {
                         System.out.println(auxNick+": Host->"+auxHost+", Puerto->"+auxPort);
                     }
 
-
                 }
+                gameDices.play(rol);
+
 
             }
 
@@ -57,8 +61,22 @@ public class Player extends Thread {
             System.out.println("No se ha podido conectar con el servidor");
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
 
+    }
+    public static synchronized int getGuestPort(){
+        return guestPort;
+    }
+    public static synchronized int getHostPort(){
+        return hostPort;
+    }
+    public static synchronized void incrementPort(){
+        guestPort ++;
+    }
+    public static synchronized void decrementPort(){
+        hostPort--;
     }
     private String convertCodeRolToString(int rol){
         if(rol==0){

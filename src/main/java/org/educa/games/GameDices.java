@@ -1,5 +1,7 @@
 package org.educa.games;
 
+import org.educa.game.Player;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -9,12 +11,21 @@ import java.net.InetSocketAddress;
 public class GameDices implements Games{
     private static final int PLAYERS_NEEDED = 2;
     private static final String NAME = "Dices";
+    private int guestPort;
+    private int hostPort;
+
 
 
     @Override
-    public void play(String rol) {
-        if (("guest").equalsIgnoreCase(rol)) {
-            InetSocketAddress addrGuest = new InetSocketAddress("localhost", 5556);
+    public void play(int role) throws InterruptedException {
+        if (role == 1) {
+            Thread.sleep(2000);
+            this.guestPort = Player.getGuestPort();
+            Player.incrementPort();
+            this.hostPort = Player.getHostPort();
+            System.out.println("Estoy tirando para mandarselo al hostport "+hostPort);
+            InetSocketAddress addrGuest = new InetSocketAddress("localhost", guestPort);
+
             try (DatagramSocket datagramSocket = new DatagramSocket(addrGuest)) {
                 boolean draw = true;
                 while (draw) {
@@ -22,31 +33,40 @@ public class GameDices implements Games{
                     System.out.println("Resultado de la tirada: " + roll);
                     sendResultDice(datagramSocket, roll);
                     String result = receiveGameResult(datagramSocket);
-                    if(!("E").equalsIgnoreCase(result)){
+                    System.out.println(winner(result));
+                    if (!("E").equalsIgnoreCase(result)) {
                         draw = false;
                     }
 
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         } else {
-
-            InetSocketAddress addrHost = new InetSocketAddress("localhost",5557);
+            this.hostPort = Player.getHostPort();
+            Player.decrementPort();
+            this.guestPort = Player.getGuestPort();
+            System.out.println("esperando a invitado "+hostPort);
+            InetSocketAddress addrHost = new InetSocketAddress("localhost", hostPort);
             try (DatagramSocket datagramSocket = new DatagramSocket(addrHost)) {
                 boolean draw = true;
                 while (draw) {
+
                     int guestResult = receiveResultDice(datagramSocket);
+                    System.out.println(""+guestResult);
                     int roll = (int) (Math.random() * 6) + 1;
                     System.out.println("Resultado de la tirada: " + roll);
-                    String result = gameResult(guestResult,roll);
-                    sendGameResult(datagramSocket,result);
-                    if(!("E").equalsIgnoreCase(result)){
+                    String result = gameResult(guestResult, roll);
+                    System.out.println(winner(result));
+                    sendGameResult(datagramSocket, result);
+                    if (!("E").equalsIgnoreCase(result)) {
                         draw = false;
                     }
 
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -59,7 +79,7 @@ public class GameDices implements Games{
     private void sendResultDice(DatagramSocket datagramSocket, int roll) throws IOException {
         InetAddress adrToSend = InetAddress.getByName("localhost");
         String resultRoll = String.valueOf(roll);
-        DatagramPacket datagramPacket = new DatagramPacket(resultRoll.getBytes(),resultRoll.getBytes().length,adrToSend,5557);
+        DatagramPacket datagramPacket = new DatagramPacket(resultRoll.getBytes(),resultRoll.getBytes().length,adrToSend,hostPort);
         datagramSocket.send(datagramPacket);
         System.out.println("Tirada enviada al Anfitrion");
     }
@@ -72,9 +92,9 @@ public class GameDices implements Games{
     }
     private void sendGameResult(DatagramSocket datagramSocket, String gameResult) throws IOException{
         InetAddress adrToSend = InetAddress.getByName("localhost");
-        DatagramPacket datagramPacket = new DatagramPacket(gameResult.getBytes(),gameResult.getBytes().length,adrToSend,5556);
+        DatagramPacket datagramPacket = new DatagramPacket(gameResult.getBytes(),gameResult.getBytes().length,adrToSend,guestPort);
         datagramSocket.send(datagramPacket);
-        System.out.println("Tirada enviada al Anfitrion");
+        System.out.println("Resultado enviado al invitado");
 
     }
     private String receiveGameResult(DatagramSocket datagramSocket)throws IOException{
@@ -91,6 +111,16 @@ public class GameDices implements Games{
             return "D";
         }else{
             return "E";
+        }
+    }
+    private String winner(String result){
+        if(("E").equalsIgnoreCase(result)){
+            return "Empate";
+        }else if(("V").equalsIgnoreCase(result)){
+            return "Ha ganado Anfitrion";
+
+        }else {
+            return "Ha ganado Invitado";
         }
     }
     public int getPlayerNeeded(){
