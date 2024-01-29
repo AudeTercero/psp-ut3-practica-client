@@ -8,6 +8,10 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+/**
+ * Clase que simula el juego de los dados
+ * @author Iker Ruiz y Javier Villarta Martinez
+ */
 public class GameDices implements Games{
     private static final int PLAYERS_NEEDED = 2;
     private static final String NAME = "Dices";
