@@ -62,7 +62,7 @@ public class Player extends Thread {
 
                 }
                 gameDices.play(rol,idMatch);
-                sendFinalMatch(playerSocket,rol,idMatch);
+                sendFinalMatch(rol,idMatch);
 
 
             }
@@ -115,8 +115,10 @@ public class Player extends Thread {
      * @param idMatch
      * @throws IOException
      */
-    private void sendFinalMatch(Socket playerSocket,int role,int idMatch)throws IOException{
+    private void sendFinalMatch(int role,int idMatch)throws IOException{
+
         if(role==0){
+            Socket playerSocket = new Socket(HOST,PORT);
             PrintWriter writer = new PrintWriter(playerSocket.getOutputStream(), true);
             String dataPlayer = idMatch +"," ;
             writer.println(dataPlayer);
