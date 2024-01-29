@@ -31,9 +31,24 @@ public class Player extends Thread {
             players = receiveResponse(playerSocket);
 
             if (players != null) {
+                int idMatch;
+                int rol;
                 for (String s : players) {
-                    System.out.println(s);
+                    if(this.getName().equalsIgnoreCase(s.split(",")[1])){
+                        idMatch = Integer.parseInt(s.split(",")[0]);
+                        rol = Integer.parseInt(s.split(",")[4]);
+                        System.out.println("Partida: "+idMatch + " Eres: "+convertCodeRolToString(rol));
+                    }else {
+                        String auxNick = s.split(",")[1];
+                        String auxHost = s.split(",")[2];
+                        int auxPort = Integer.parseInt(s.split(",")[3]);
+                        int auxRol = Integer.parseInt(s.split(",")[4]);
+                        System.out.println(auxNick+": Host->"+auxHost+", Puerto->"+auxPort);
+                    }
+
+
                 }
+
             }
 
 
@@ -44,6 +59,13 @@ public class Player extends Thread {
             throw new RuntimeException(e);
         }
 
+    }
+    private String convertCodeRolToString(int rol){
+        if(rol==0){
+            return "Anfitrion";
+        }else{
+            return "Invitado";
+        }
     }
 
 
